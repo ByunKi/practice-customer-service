@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Inquire</title>
+  <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"/>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#">고객센터</a>
+
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item">
+        <a class="nav-link" th:href="@{/cs/logout}">Logout</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container">
+  <form method="post"
+        th:action="@{${session.isAdmin ? '/cs/admin/answer' : '/cs/inquiry'}}">
+
+    <div class="form-group row">
+      <label class="col-sm-2 col-form-label">제목:</label>
+      <div class="col-sm-10">
+        <input type="text"
+               name="title"
+               th:value="${inquiry?.title}"
+               th:disabled="${session.isAdmin}"
+               class="form-control"
+               required/>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label class="col-sm-2 col-form-label">답변여부:</label>
+      <div class="col-sm-10">
+        <input
+            type="text"
+            name="answered"
+            th:value="${inquiry?.isAnswered eq 1 ? 'Yes' : 'No'}"
+            class="form-control"
+            disabled/>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label class="col-sm-2 col-form-label">분류:</label>
+      <div class="col-sm-10">
+        <select name="type"
+                th:disabled="${session.isAdmin}"
+                class="form-control"
+                required>
+          <div th:switch="${view eq true}">
+            <div th:case="true">
+              <option
+                  th:each="type : ${types}"
+                  th:value="${type.ordinal}"
+                  th:text="${type.value}"
+                  th:selected="${type.value} eq ${inquiry.type.koreanCode}"/>
+            </div>
+            <div th:case="false">
+              <option
+                  th:each="type : ${types}"
+                  th:value="${type.ordinal}"
+                  th:text="${type.value}"/>
+            </div>
+          </div>
+        </select>
+
+
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label class="col-sm-2 col-form-label">내용:</label>
+      <div class="col-sm-10">
+            <textarea
+                name="content"
+                cols="20"
+                rows="10"
+                th:disabled="${session.isAdmin}"
+                class="form-control"
+                required
+                th:text="${inquiry?.content}"
+            ></textarea>
+      </div>
+    </div>
+
+    <div
+        th:style="${session.isAdmin or (view eq true and inquiry.isAnswered eq 1) ? 'display: block' : 'display: none'}">
+      <div class="form-group row">
+        <label class="col-sm-2 col-form-label">답변 담당자:</label>
+        <div class="col-sm-10">
+          <input
+              type="text"
+              name="answerer"
+              th:value="${answer?.answerer?.id}"
+              th:disabled="${not session.isAdmin}"
+              class="form-control"
+          />
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-sm-2 col-form-label">답변 일:</label>
+        <div class="col-sm-10">
+          <input
+              type="date"
+              name="answeredAt"
+              th:value="${answer?.answeredAt}"
+              th:disabled="${not session.isAdmin}"
+              class="form-control"
+          />
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-sm-2 col-form-label">답변:</label>
+        <div class="col-sm-10">
+          <textarea
+              name="answer"
+              cols="20"
+              rows="10"
+              th:disabled="${not session.isAdmin}"
+              required
+              class="form-control"
+              th:text="${answer?.content}"/>
+        </div>
+      </div>
+    </div>
+
+    <input type="hidden"
+           name="inquirer"
+           th:value="${inquiry.inquirer.id}"/>
+
+    <input type="hidden"
+           name="id"
+           th:value="${inquiry.id}"/>
+
+    <br/>
+    <div th:if="${session.isAdmin or view eq false}">
+      <input
+          type="submit"
+          th:value="${session.isAdmin ? '답변' : '문의'}"
+          class="btn btn-primary"
+      />
+    </div>
+
+    <a th:with="inquirerLink='/cs/' + ${session.id}"
+       th:href="@{${session.isAdmin ? '/cs/admin/' : inquirerLink}}"
+       class="btn btn-primary">취소
+    </a>
+  </form>
+</div>
+
+<footer class="footer mt-auto py-3 bg-light">
+  <div class="container text-center">
+    <span class="text-muted">© 2024 고객센터. All rights reserved.</span>
+  </div>
+</footer>
+</body>
+</html>

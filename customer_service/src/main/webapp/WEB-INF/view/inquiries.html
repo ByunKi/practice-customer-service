@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Inquiries</title>
+  <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"/>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#">고객센터</a>
+
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item">
+        <a class="nav-link" th:href="@{/cs/logout}">Logout</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-3">
+      <form
+          method="post"
+          th:action="@{'/cs/search/' + ${session.id}}"
+          th:style="'max-width: 100%; position: sticky; top: 0;' + (${session.isAdmin} ? 'display: none;' : 'display: block;')">
+        <div class="form-row">
+          <div class="form-group col-md-8">
+            <select name="type" class="form-control" required>
+              <option
+                  th:each="type : ${types}"
+                  th:value="${type.ordinal}"
+                  th:text="${type.value}"/>
+            </select>
+          </div>
+
+          <div class="form-group col-md-4">
+            <button type="submit" class="btn btn-primary btn-block">검색</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <table class="table mt-4">
+    <thead>
+    <tr>
+      <th>제목</th>
+      <th>분류</th>
+      <th>작성자</th>
+      <th>작성일</th>
+      <th th:unless="${session.isAdmin}">문의 여부</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr th:each="inquiry : ${inquiries}">
+      <td>
+        <a th:href="@{${session.isAdmin ? '/cs/admin/answer/' : '/cs/inquiry/'} + ${inquiry.id}}"
+           th:text="${inquiry.title}"/>
+      </td>
+      <td th:text="${inquiry.type.koreanCode}"></td>
+      <td th:text="${inquiry.inquirer.id}"></td>
+      <td th:text="${inquiry.inquiredAt}"></td>
+
+      <td th:if="${not session.isAdmin}"
+          th:text="${inquiry.isAnswered eq 1 ? 'Yes' : 'No'}"/>
+    </tr>
+    </tbody>
+  </table>
+
+  <a th:href="@{'/cs/inquiry/0'}"
+     th:style="'display: ' + (${session.isAdmin} ? 'none;' : 'block;')"
+     style="color: white"
+     class="btn btn-primary">
+    문의
+  </a>
+</div>
+
+<footer class="footer mt-auto py-3 bg-light">
+  <div class="container text-center">
+    <span class="text-muted">© 2024 고객센터. All rights reserved.</span>
+  </div>
+</footer>
+</body>
+</html>
